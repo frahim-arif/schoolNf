@@ -33,22 +33,36 @@ import {
   Paperclip,
   Percent,
   Layers,
-   Bus,
+  Bus,
   Award,
   BedDouble,
   Library,
   Settings,
   Banknote,
-  LayoutGrid,
   ChevronDown,
 } from "lucide-react";
 
-// Logo is stored at: src/images/logo.png
+// Logo is stored at: src/images/logo.png  (replace this file with the school logo)
 // Path below is relative to src/app/admin/dashboard/page.jsx
 import logo from "../../../images/logo.png";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 const API_ROOT = API_BASE.endsWith("/api") ? API_BASE : `${API_BASE}/api`;
+
+// ---- School details (edit here) ----
+const SCHOOL_NAME = "Niz Dhing GyanDeep Jatiya Bidyalaya";
+const DEFAULT_ADDRESS = "Niz Dhing, Nagaon, Assam";
+const UDISE_CODE = "18100102011";
+// Neutral fallbacks. Fill these in, or return them from the /school API
+// (school.principal, school.phone, school.classes, school.timing, school.board, school.affiliation).
+const FALLBACK = {
+  principal: "Not configured",
+  phone: "Not configured",
+  classes: "Not configured",
+  timing: "Not configured",
+  board: "Not configured",
+  affiliation: "Not configured",
+};
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
@@ -58,6 +72,7 @@ const STATUS_STYLE = {
   Draft: "bg-slate-100 text-slate-600 ring-slate-200",
   Expired: "bg-amber-50 text-amber-700 ring-amber-200",
 };
+
 const MODULES = [
   { title: "Front Office", icon: Building2, tone: "rose", links: [
     ["Dashboard", "/admin/front-office"], ["Admission Enquiry", "/admin/front-office/admission-enquiry"],
@@ -72,7 +87,7 @@ const MODULES = [
     ["Student ID Cards", "/admin/students/id-cards"], ["Student Attendance", "/admin/attendance/student"],
     ["Student Reports", "/admin/students/reports"],
   ]},
-  { title: "Academics", icon: GraduationCap, tone: "emerald", links: [
+  { title: "Academics", icon: GraduationCap, tone: "lime", links: [
     ["Academic Overview", "/admin/academic-setup"], ["Classes", "/admin/academic-setup/classes"],
     ["Sections", "/admin/academic-setup/sections"], ["Subjects", "/admin/academic-setup/subjects"],
     ["Class–Subject Assignment", "/admin/academic-setup/class-subjects"], ["Timetable", "/admin/academic-setup/timetable"],
@@ -101,7 +116,7 @@ const MODULES = [
     ["Staff Attendance", "/admin/staff/attendance"], ["Leave Applications", "/admin/hr/leaves"],
     ["Staff ID Cards", "/admin/certificates/staff-id-cards"], ["HR Reports", "/admin/hr/reports"], ["HR Settings", "/admin/hr/settings"],
   ]},
-  { title: "Payroll", icon: Banknote, tone: "emerald", links: [
+  { title: "Payroll", icon: Banknote, tone: "lime", links: [
     ["Payroll Dashboard", "/admin/payroll"], ["Salary Structure", "/admin/payroll/structure"],
     ["Generate Salary", "/admin/payroll/generate"], ["Salary Payments", "/admin/payroll/payments"],
     ["Salary Slips", "/admin/payroll/slips"], ["Deductions & Allowances", "/admin/payroll/deductions"],
@@ -138,7 +153,7 @@ const MODULES = [
     ["Hostel Fees", "/admin/hostels/fees"], ["Visitors & Complaints", "/admin/hostels/visitors"],
     ["Hostel Reports", "/admin/hostels/reports"], ["Hostel Settings", "/admin/hostels/settings"],
   ]},
-  { title: "Online Admission", icon: FileText, tone: "emerald", links: [
+  { title: "Online Admission", icon: FileText, tone: "lime", links: [
     ["Admission Dashboard", "/admin/online-admission"], ["Admission Applications", "/admin/online-admission/applications"],
     ["Review Applications", "/admin/online-admission/review"], ["Approved Applications", "/admin/online-admission/approved"],
     ["Rejected Applications", "/admin/online-admission/rejected"], ["Admission Form Settings", "/admin/online-admission/settings"],
@@ -275,10 +290,14 @@ export default function Dashboard() {
     setGreeting(h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
   }, []);
 
-  const schoolName = "Adarsha Markaz Academy";
-  // Principal is fixed (not loaded from the API)
-  const principal = "Md Baharul Islam";
-  const address = school?.address || "Laharighat, Morigaon, Assam - 782127";
+  const schoolName = SCHOOL_NAME;
+  const address = school?.address || DEFAULT_ADDRESS;
+  const principal = school?.principal || FALLBACK.principal;
+  const phone = school?.phone || FALLBACK.phone;
+  const classesInfo = school?.classes || FALLBACK.classes;
+  const timing = school?.timing || FALLBACK.timing;
+  const board = school?.board || FALLBACK.board;
+  const affiliation = school?.affiliation || FALLBACK.affiliation;
 
   const formatName = (s) => [s.firstName, s.lastName].filter(Boolean).join(" ") || "Unnamed Student";
 
@@ -311,17 +330,17 @@ export default function Dashboard() {
   const v = (n) => (loading ? "…" : Number(n).toLocaleString("en-IN"));
 
   return (
-    <div className="min-h-screen space-y-6 bg-slate-50 pb-8 text-slate-800 sm:space-y-8">
+    <div className="min-h-screen space-y-6 bg-[#f4f8f6] pb-8 text-slate-800 sm:space-y-8">
       {/* HEADER (left padding on mobile leaves room for the sidebar menu button) */}
       <div className="flex flex-col justify-between gap-4 pl-14 sm:flex-row sm:items-center lg:pl-0">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
-            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-100">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
             School management system
           </span>
-          <h1 className="mt-2.5 text-2xl font-black tracking-tight text-slate-900 sm:text-4xl">Analytics Dashboard</h1>
+          <h1 className="mt-2.5 text-2xl font-black tracking-tight text-[#173b32] sm:text-4xl">Analytics Dashboard</h1>
           <p className="mt-1.5 flex min-h-5 items-center gap-2 text-sm text-slate-500">
-            <CalendarDays size={16} className="text-rose-500" />
+            <CalendarDays size={16} className="text-emerald-600" />
             {dateLabel || "\u00a0"}
           </p>
         </div>
@@ -330,7 +349,7 @@ export default function Dashboard() {
           type="button"
           onClick={() => loadDashboard(true)}
           disabled={loading || refreshing}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-rose-50 hover:text-rose-700 hover:ring-rose-200 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-emerald-50 hover:text-emerald-800 hover:ring-emerald-200 disabled:opacity-50"
         >
           <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
           {refreshing ? "Refreshing..." : "Refresh Data"}
@@ -348,9 +367,9 @@ export default function Dashboard() {
       )}
 
       {/* HERO */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-600 via-rose-600 to-pink-700 p-5 text-white shadow-2xl shadow-rose-900/20 sm:p-8">
-        <div className="pointer-events-none absolute -right-12 -top-16 h-72 w-72 rounded-full bg-white/15 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-pink-300/30 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1f4d40] via-[#173b32] to-[#0d2620] p-5 text-white shadow-2xl shadow-emerald-950/25 sm:p-8">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-72 w-72 rounded-full bg-emerald-300/15 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-teal-300/20 blur-3xl" />
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.12]"
           style={{ backgroundImage: "radial-gradient(#fff 1px, transparent 1px)", backgroundSize: "24px 24px" }}
@@ -363,14 +382,14 @@ export default function Dashboard() {
               {greeting}, Administrator
             </span>
             <h2 className="mt-4 text-2xl font-black leading-tight sm:text-4xl">{schoolName}</h2>
-            <p className="mt-2.5 text-sm leading-6 text-rose-50/90 sm:text-base">
+            <p className="mt-2.5 text-sm leading-6 text-emerald-50/90 sm:text-base">
               Monitor your school operations, student records and daily activities from one place.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
                 href="/admin/students/create"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-rose-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-rose-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-[#173b32] shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50"
               >
                 <UserPlus size={17} />
                 New Admission
@@ -384,14 +403,14 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-2xl bg-white/12 p-4 ring-1 ring-white/25 backdrop-blur-md sm:gap-5 sm:p-5 lg:min-w-80">
+          <div className="flex items-center gap-4 rounded-2xl bg-white/10 p-4 ring-1 ring-white/25 backdrop-blur-md sm:gap-5 sm:p-5 lg:min-w-80">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-lg sm:h-20 sm:w-20">
               <Image src={logo} alt={`${schoolName} logo`} className="h-full w-auto object-contain" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-rose-100">Total enrollment</p>
+              <p className="text-xs font-semibold text-emerald-100">Total enrollment</p>
               <p className="mt-0.5 text-4xl font-black tabular-nums sm:text-5xl">{v(students.length)}</p>
-              <p className="mt-0.5 text-xs text-rose-100/90">Students in database</p>
+              <p className="mt-0.5 text-xs text-emerald-100/90">Students in database</p>
             </div>
           </div>
         </div>
@@ -403,7 +422,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-6">
           <StatTile title="Total Students" value={v(students.length)} icon={GraduationCap} tone="rose" />
           <StatTile title="Teachers" value={v(teachers.length)} icon={Users} tone="indigo" />
-          <StatTile title="Active Students" value={v(activeStudents)} icon={UserCheck} tone="emerald" />
+          <StatTile title="Active Students" value={v(activeStudents)} icon={UserCheck} tone="lime" />
           <StatTile title="Inactive Students" value={v(inactiveStudents)} icon={UserRoundCog} tone="amber" />
           <StatTile title="Classes" value={v(classCount)} icon={Layers} tone="sky" />
           <StatTile title="Students per Teacher" value={loading ? "…" : ratio || "—"} icon={Percent} tone="pink" />
@@ -430,14 +449,14 @@ export default function Dashboard() {
       </section>
 
       {/* ALL MODULES (sidebar quick links) */}
-<section>
-  <SectionTitle title="All Modules" sub="Sidebar ke saare quick links ek jagah" right={`${MODULES.length} modules`} />
-  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-    {MODULES.map((m) => (
-      <ModuleCard key={m.title} module={m} />
-    ))}
-  </div>
-</section>
+      <section>
+        <SectionTitle title="All Modules" sub="Sidebar ke saare quick links ek jagah" right={`${MODULES.length} modules`} />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {MODULES.map((m) => (
+            <ModuleCard key={m.title} module={m} />
+          ))}
+        </div>
+      </section>
 
       {/* ANALYTICS */}
       <section className="grid gap-5 xl:grid-cols-3">
@@ -458,9 +477,9 @@ export default function Dashboard() {
                         {item.count} <span className="font-medium text-slate-400">({p}%)</span>
                       </span>
                     </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-rose-50">
+                    <div className="h-2.5 overflow-hidden rounded-full bg-emerald-50">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-rose-600 to-pink-400 transition-all duration-700"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-teal-400 transition-all duration-700"
                         style={{ width: `${Math.max(4, (item.count / maxClass) * 100)}%` }}
                       />
                     </div>
@@ -471,7 +490,7 @@ export default function Dashboard() {
           ) : (
             <EmptyState icon={GraduationCap} title="No student analytics yet" text="Class distribution will appear after student records are added." />
           )}
-          <Link href="/admin/students" className="mt-6 inline-flex items-center gap-1 text-sm font-extrabold text-rose-600 hover:text-rose-700">
+          <Link href="/admin/students" className="mt-6 inline-flex items-center gap-1 text-sm font-extrabold text-emerald-700 hover:text-emerald-800">
             Manage student records <ChevronRight size={16} />
           </Link>
         </Panel>
@@ -485,7 +504,7 @@ export default function Dashboard() {
                 <div
                   className="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
                   style={{
-                    background: `conic-gradient(#e11d48 ${students.length ? (activeStudents / students.length) * 360 : 0}deg, #ffe4e6 0deg)`,
+                    background: `conic-gradient(#047857 ${students.length ? (activeStudents / students.length) * 360 : 0}deg, #d1fae5 0deg)`,
                   }}
                 >
                   <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white shadow-inner">
@@ -494,8 +513,8 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="min-w-0 space-y-4">
-                  <Legend color="bg-rose-600" label="Active" value={activeStudents} />
-                  <Legend color="bg-rose-100 ring-1 ring-rose-200" label="Inactive" value={inactiveStudents} />
+                  <Legend color="bg-emerald-700" label="Active" value={activeStudents} />
+                  <Legend color="bg-emerald-100 ring-1 ring-emerald-200" label="Inactive" value={inactiveStudents} />
                 </div>
               </div>
               <p className="mt-6 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
@@ -514,7 +533,7 @@ export default function Dashboard() {
               {[
                 ["Total", noticeStats.total, "bg-slate-50 text-slate-700"],
                 ["Active", noticeStats.active, "bg-emerald-50 text-emerald-700"],
-                ["Drafts", noticeStats.drafts, "bg-rose-50 text-rose-700"],
+                ["Drafts", noticeStats.drafts, "bg-teal-50 text-teal-700"],
                 ["Views", noticeStats.views, "bg-sky-50 text-sky-700"],
               ].map(([label, n, tone]) => (
                 <div key={label} className={`rounded-2xl p-3 text-center ${tone}`}>
@@ -533,10 +552,10 @@ export default function Dashboard() {
                 <Link
                   key={n._id}
                   href="/admin/notices"
-                  className="group flex items-center gap-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-transparent transition hover:bg-rose-50 hover:ring-rose-200"
+                  className="group flex items-center gap-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-transparent transition hover:bg-emerald-50 hover:ring-emerald-200"
                 >
-                  <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-rose-100">
-                    <span className="text-lg font-black leading-none text-rose-600">
+                  <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-emerald-100">
+                    <span className="text-lg font-black leading-none text-emerald-700">
                       {n.publishDate ? new Date(n.publishDate).toLocaleDateString("en-IN", { day: "2-digit" }) : "--"}
                     </span>
                     <span className="text-[10px] font-bold text-slate-500">
@@ -568,11 +587,11 @@ export default function Dashboard() {
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Link
               href="/admin/notices/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-rose-500/25 transition hover:bg-rose-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-900/20 transition hover:bg-emerald-800"
             >
               <Bell size={16} /> Create Notice
             </Link>
-            <Link href="/admin/notices" className="inline-flex items-center gap-1 text-sm font-extrabold text-rose-600 hover:text-rose-700">
+            <Link href="/admin/notices" className="inline-flex items-center gap-1 text-sm font-extrabold text-emerald-700 hover:text-emerald-800">
               View all notices <ChevronRight size={16} />
             </Link>
           </div>
@@ -586,9 +605,9 @@ export default function Dashboard() {
               recentStudents.map((s) => (
                 <div
                   key={s._id || s.admissionNo}
-                  className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-transparent transition hover:bg-rose-50 hover:ring-rose-200"
+                  className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-transparent transition hover:bg-emerald-50 hover:ring-emerald-200"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-sm font-black text-white shadow-md shadow-rose-500/25">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-sm font-black text-white shadow-md shadow-emerald-900/20">
                     {(s.firstName || "S").slice(0, 1).toUpperCase()}
                     {(s.lastName || "").slice(0, 1).toUpperCase()}
                   </div>
@@ -645,20 +664,20 @@ export default function Dashboard() {
       </section>
 
       {/* SCHOOL INFORMATION */}
-      <section className="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-rose-100 sm:p-7">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-rose-100/70 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-emerald-100 sm:p-7">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-100/70 blur-3xl" />
         <div className="relative flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-rose-50 p-2 ring-1 ring-rose-100">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 p-2 ring-1 ring-emerald-100">
             <Image src={logo} alt={`${schoolName} logo`} className="h-full w-auto object-contain" />
           </div>
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
               School profile
             </span>
-            <h3 className="mt-2 text-xl font-black text-slate-900">{schoolName}</h3>
+            <h3 className="mt-2 text-xl font-black text-[#173b32]">{schoolName}</h3>
             <p className="mt-1.5 flex items-start gap-2 text-sm leading-5 text-slate-600">
-              <MapPin className="mt-0.5 shrink-0 text-rose-500" size={15} />
+              <MapPin className="mt-0.5 shrink-0 text-emerald-600" size={15} />
               {address}
             </p>
           </div>
@@ -666,11 +685,12 @@ export default function Dashboard() {
 
         <div className="relative mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <InfoBox icon={UserRound} label="Principal" value={principal} />
-          <InfoBox icon={Phone} label="Contact number" value={school?.phone || "Not configured"} />
-          <InfoBox icon={GraduationCap} label="Classes" value="Nursery to Class XII" />
-          <InfoBox icon={Clock} label="School timing" value="9:00 AM – 12:35 PM" />
-          <InfoBox icon={BadgeCheck} label="School board" value="ASSEB (Received Prior Permission)" />
-          <InfoBox icon={Building2} label="Affiliated to" value="Markazul Ma’arif, Hojai" />
+          <InfoBox icon={Phone} label="Contact number" value={phone} />
+          <InfoBox icon={GraduationCap} label="Classes" value={classesInfo} />
+          <InfoBox icon={Clock} label="School timing" value={timing} />
+          <InfoBox icon={BadgeCheck} label="School board" value={board} />
+          <InfoBox icon={Building2} label="Affiliated to" value={affiliation} />
+          <InfoBox icon={FileText} label="UDISE code" value={UDISE_CODE} />
         </div>
 
         <div className="relative mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
@@ -681,7 +701,7 @@ export default function Dashboard() {
           </p>
           <Link
             href="/admin/students/id-cards"
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-rose-600"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#173b32] px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-700"
           >
             <FileText size={16} />
             Student ID Cards
@@ -695,9 +715,12 @@ export default function Dashboard() {
 
 /* ---------- Small components (kept in this file, no extra imports needed) ---------- */
 
+// "rose" and "pink" keys are kept so existing usages keep working;
+// they now map to the school's green / teal palette.
 const TONES = {
-  rose: "bg-rose-50 text-rose-600",
-  pink: "bg-pink-50 text-pink-600",
+  rose: "bg-emerald-50 text-emerald-700",
+  pink: "bg-teal-50 text-teal-700",
+  lime: "bg-lime-50 text-lime-700",
   indigo: "bg-indigo-50 text-indigo-600",
   emerald: "bg-emerald-50 text-emerald-600",
   amber: "bg-amber-50 text-amber-600",
@@ -708,7 +731,7 @@ function SectionTitle({ title, sub, right }) {
   return (
     <div className="mb-3 flex items-end justify-between gap-3 sm:mb-4">
       <div>
-        <h2 className="text-lg font-black text-slate-900 sm:text-xl">{title}</h2>
+        <h2 className="text-lg font-black text-[#173b32] sm:text-xl">{title}</h2>
         <p className="mt-0.5 text-sm text-slate-500">{sub}</p>
       </div>
       {right && <span className="text-xs font-medium text-slate-400">{right}</span>}
@@ -724,7 +747,7 @@ function ModuleCard({ module: m }) {
   const extra = m.links.length - LIMIT;
 
   return (
-    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-rose-200/40 hover:ring-rose-200">
+    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-200/40 hover:ring-emerald-200">
       <div className="flex items-center gap-3">
         <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${TONES[m.tone] || TONES.rose}`}>
           <Icon size={21} />
@@ -740,10 +763,10 @@ function ModuleCard({ module: m }) {
           <Link
             key={`${label}-${href}`}
             href={href}
-            className="group flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-transparent transition hover:bg-rose-50 hover:text-rose-700 hover:ring-rose-200"
+            className="group flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-transparent transition hover:bg-emerald-50 hover:text-emerald-800 hover:ring-emerald-200"
           >
             <span className="truncate">{label}</span>
-            <ChevronRight size={15} className="shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-rose-500" />
+            <ChevronRight size={15} className="shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600" />
           </Link>
         ))}
       </div>
@@ -752,7 +775,7 @@ function ModuleCard({ module: m }) {
         <button
           type="button"
           onClick={() => setShowAll((s) => !s)}
-          className="mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-rose-600 hover:text-rose-700"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-emerald-700 hover:text-emerald-800"
         >
           {showAll ? "Show less" : `+${extra} more`}
           <ChevronDown size={16} className={`transition-transform ${showAll ? "rotate-180" : ""}`} />
@@ -761,9 +784,10 @@ function ModuleCard({ module: m }) {
     </div>
   );
 }
+
 function StatTile({ title, value, icon: Icon, tone = "rose" }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-200/40 hover:ring-rose-200 sm:rounded-3xl sm:p-5">
+    <div className="group relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-200/40 hover:ring-emerald-200 sm:rounded-3xl sm:p-5">
       <span className={`flex h-10 w-10 items-center justify-center rounded-xl transition duration-300 group-hover:rotate-6 sm:h-11 sm:w-11 sm:rounded-2xl ${TONES[tone] || TONES.rose}`}>
         <Icon size={20} />
       </span>
@@ -777,9 +801,9 @@ function ActionTile({ title, href, icon: Icon }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center gap-2.5 rounded-2xl bg-white p-3.5 text-center shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:bg-gradient-to-br hover:from-rose-600 hover:to-pink-600 hover:shadow-xl hover:shadow-rose-300/40 hover:ring-transparent sm:p-4"
+      className="group flex flex-col items-center gap-2.5 rounded-2xl bg-white p-3.5 text-center shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:bg-gradient-to-br hover:from-emerald-700 hover:to-teal-600 hover:shadow-xl hover:shadow-emerald-300/40 hover:ring-transparent sm:p-4"
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 transition duration-300 group-hover:bg-white/20 group-hover:text-white">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition duration-300 group-hover:bg-white/20 group-hover:text-white">
         <Icon size={21} />
       </span>
       <span className="text-xs font-extrabold leading-tight text-slate-800 transition group-hover:text-white sm:text-sm">{title}</span>
@@ -796,11 +820,11 @@ function Panel({ title, sub, icon: Icon, action, className = "", children }) {
           <p className="mt-0.5 text-sm text-slate-500">{sub}</p>
         </div>
         {action ? (
-          <Link href={action.href} className="text-sm font-bold text-rose-600 hover:text-rose-700">
+          <Link href={action.href} className="text-sm font-bold text-emerald-700 hover:text-emerald-800">
             {action.label}
           </Link>
         ) : (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
             <Icon size={21} />
           </span>
         )}
@@ -825,7 +849,7 @@ function Legend({ color, label, value }) {
 function EmptyState({ icon: Icon, title, text }) {
   return (
     <div className="py-9 text-center">
-      <Icon size={30} className="mx-auto text-rose-300" />
+      <Icon size={30} className="mx-auto text-emerald-300" />
       <p className="mt-3 font-bold text-slate-700">{title}</p>
       <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">{text}</p>
     </div>
@@ -834,7 +858,7 @@ function EmptyState({ icon: Icon, title, text }) {
 
 function OperationCard({ icon: Icon, title, description, href, action, tone }) {
   return (
-    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-rose-200/40 hover:ring-rose-200">
+    <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-200/40 hover:ring-emerald-200">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-black text-slate-900">{title}</h3>
@@ -844,7 +868,7 @@ function OperationCard({ icon: Icon, title, description, href, action, tone }) {
           <Icon size={20} />
         </span>
       </div>
-      <Link href={href} className="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-rose-600 hover:text-rose-700">
+      <Link href={href} className="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-emerald-700 hover:text-emerald-800">
         {action} <ChevronRight size={16} />
       </Link>
     </div>
@@ -854,7 +878,7 @@ function OperationCard({ icon: Icon, title, description, href, action, tone }) {
 function InfoBox({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-rose-600 shadow-sm ring-1 ring-rose-100">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-100">
         <Icon size={17} />
       </span>
       <div className="min-w-0">

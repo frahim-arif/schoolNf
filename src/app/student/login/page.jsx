@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "https://school1b.onrender.com"
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/+$/, "");
 
 const API_ROOT = API_BASE.endsWith("/api")

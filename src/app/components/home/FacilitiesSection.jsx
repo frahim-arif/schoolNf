@@ -6,17 +6,36 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 const H = "font-[family-name:var(--font-head)]";
 const wrap = "mx-auto max-w-7xl px-5 md:px-8";
-const DURATION = 4800; // ms per facility
+const DURATION = 5200; // ms per facility (desktop autoplay)
+
+/* Every panel gets its own colour (blue, green, purple, orange, pink, teal), repeated if there are more facilities */
+const LOOKS = [
+  "from-sky-500 via-blue-600 to-blue-950",
+  "from-emerald-500 via-green-600 to-emerald-950",
+  "from-violet-500 via-purple-600 to-purple-950",
+  "from-amber-400 via-orange-500 to-orange-900",
+  "from-rose-500 via-pink-600 to-rose-950",
+  "from-cyan-500 via-teal-600 to-teal-950",
+];
 
 /* facilities = [{ icon: LucideIcon, title, desc }, ...] */
 export default function FacilitiesSection({ facilities = [] }) {
   const n = facilities.length;
   const ref = useRef(null);
-  const touchX = useRef(null);
   const [shown, setShown] = useState(false);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [tick, setTick] = useState(0);
+  const [reduced, setReduced] = useState(false);
+  const [desktop, setDesktop] = useState(false);
+
+  useEffect(() => {
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
@@ -38,237 +57,207 @@ export default function FacilitiesSection({ facilities = [] }) {
     return () => io.disconnect();
   }, []);
 
-  // auto-rotate (stops on mouse hover and for reduced-motion users)
+  /* autoplay only on desktop (on mobile the list would jump around) */
+  const autoplay = shown && desktop && !reduced && !paused && n > 1;
   useEffect(() => {
-    if (!shown || paused || n < 2) return;
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setTimeout(() => {
-      setActive((a) => (a + 1) % n);
-      setTick((t) => t + 1);
-    }, DURATION);
+    if (!autoplay) return;
+    const id = setTimeout(() => setActive((a) => (a + 1) % n), DURATION);
     return () => clearTimeout(id);
-  }, [shown, paused, active, tick, n]);
-
-  const go = (i) => {
-    setActive((i + n) % n);
-    setTick((t) => t + 1);
-  };
-
-  // swipe support (mobile)
-  const onTouchStart = (e) => {
-    touchX.current = e.touches[0].clientX;
-  };
-  const onTouchEnd = (e) => {
-    if (touchX.current == null) return;
-    const dx = e.changedTouches[0].clientX - touchX.current;
-    touchX.current = null;
-    if (Math.abs(dx) > 50) go(dx < 0 ? active + 1 : active - 1);
-  };
-
-  // hover only for real mouse (touch devices fire fake mouseenter on tap)
-  const mouseOnly = (fn) => (e) => {
-    if (e.pointerType === "mouse") fn();
-  };
+  }, [autoplay, active, n]);
 
   if (!n) return null;
-  const cur = facilities[active];
-  const CurIcon = cur.icon;
+
+  const go = (i) => setActive((i + n) % n);
+  const hoverActivate = (i) => (e) => {
+    if (e.pointerType === "mouse" && window.matchMedia("(min-width: 1024px)").matches) setActive(i);
+  };
 
   return (
     <section
       id="facilities"
-      style={{ scrollMarginTop: "5rem" }}
-      className="relative overflow-hidden bg-white py-12 sm:py-16 md:py-28"
+      style={{ scrollMarginTop: "5rem", background: "linear-gradient(180deg,#07111F 0%,#0E1B30 100%)" }}
+      className="relative overflow-hidden py-16 text-white sm:py-20 md:py-28"
     >
       <style>{`
-        @keyframes fc-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-        @keyframes fc-icon{from{opacity:0;transform:scale(.6) rotate(-12deg)}to{opacity:1;transform:none}}
-        @keyframes fc-spin{to{transform:rotate(360deg)}}
         @keyframes fc-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-        .fc-in{animation:fc-in .6s cubic-bezier(.22,1,.36,1) both}
-        .fc-icon{animation:fc-icon .7s cubic-bezier(.22,1,.36,1) both}
-        .fc-spin{animation:fc-spin 26s linear infinite}
-        @media (prefers-reduced-motion:reduce){.fc-in,.fc-icon,.fc-spin{animation:none}}
+        @keyframes fc-up{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
+        .fc-up{opacity:0;animation:fc-up .9s cubic-bezier(.22,1,.36,1) forwards}
+        @media (prefers-reduced-motion:reduce){.fc-up,.fc-bar{animation:none!important;opacity:1!important}}
       `}</style>
 
-      {/* background */}
+      {/* multicolour glows + fine dots */}
+      <div aria-hidden="true" className="pointer-events-none absolute -top-32 right-1/4 h-[28rem] w-[28rem] rounded-full bg-violet-500/20 blur-[130px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-16 h-[24rem] w-[24rem] rounded-full bg-emerald-500/20 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-20 top-1/2 h-[20rem] w-[20rem] rounded-full bg-sky-500/20 blur-[120px]" />
       <div
-        className="pointer-events-none absolute inset-0 opacity-60"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-25"
         style={{
-          backgroundImage:
-            "linear-gradient(#E2E8F0 1px, transparent 1px), linear-gradient(90deg, #E2E8F0 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-          WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 85% 20%, black, transparent 70%)",
-          maskImage: "radial-gradient(ellipse 70% 60% at 85% 20%, black, transparent 70%)",
+          backgroundImage: "radial-gradient(rgba(226,232,240,.6) 1px, transparent 1px)",
+          backgroundSize: "38px 38px",
+          WebkitMaskImage: "linear-gradient(180deg,#000,transparent 65%)",
+          maskImage: "linear-gradient(180deg,#000,transparent 65%)",
         }}
       />
-      <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-blue-100/70 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/50 to-transparent" />
 
-      {/*
-        Mobile order: heading -> card -> list
-        Desktop: left column (heading + list), right column (card, spans 2 rows)
-      */}
-      <div
-        ref={ref}
-        className={`${wrap} relative grid items-start gap-6 transition duration-700 motion-reduce:transition-none lg:grid-cols-[0.9fr_1.1fr] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:gap-y-8 ${
-          shown ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-        }`}
-      >
-        {/* 1) HEADING */}
-        <div className="lg:col-start-1 lg:row-start-1">
-          <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3.5 py-1.5 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-            Our facilities
-          </span>
-          <h2 className={`${H} mt-3 text-[26px] font-black leading-tight text-slate-900 sm:mt-4 sm:text-3xl md:text-4xl lg:text-[42px]`}>
-            Everything Students Need to <span className="text-blue-700">Grow</span>
-          </h2>
-          <p className="mt-2.5 max-w-lg text-sm leading-6 text-slate-600 sm:mt-3 sm:text-base md:leading-7">
-            A comfortable, safe and modern environment designed to support learning and student development.
-          </p>
-        </div>
-
-        {/* 2) SHOWCASE CARD */}
-        <div
-          className="relative lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1"
-          onPointerEnter={mouseOnly(() => setPaused(true))}
-          onPointerLeave={mouseOnly(() => {
-            setPaused(false);
-            setTick((t) => t + 1);
-          })}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <div className="absolute -inset-1.5 rounded-[28px] bg-gradient-to-br from-blue-200 to-amber-100 blur-xl sm:-inset-2 sm:rounded-[32px]" />
-          <div className="relative flex min-h-[400px] flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A1B33] via-[#0F2A4D] to-[#143A6B] p-5 text-white shadow-2xl shadow-blue-900/30 sm:min-h-[380px] sm:p-8 lg:min-h-[480px] lg:p-10">
-            <div
-              className="absolute inset-0 opacity-[0.08]"
-              style={{ backgroundImage: "radial-gradient(#fff 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-            />
-            <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-blue-500/30 blur-[70px]" />
-            <div className="absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-amber-400/15 blur-[70px]" />
-            {/* big outline number: hidden on small phones to avoid overlap */}
-            <span
-              key={`n-${active}`}
-              className={`${H} fc-in pointer-events-none absolute -right-2 top-2 hidden select-none text-[130px] font-black leading-none text-transparent sm:block lg:text-[150px]`}
-              style={{ WebkitTextStroke: "1.5px rgba(255,255,255,.12)" }}
+      <div className={`${wrap} relative`}>
+        {/* Heading + controls */}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <h2
+              className={`${H} bg-gradient-to-b from-white to-sky-200 bg-clip-text text-3xl font-black leading-[1.1] text-transparent sm:text-4xl md:text-5xl lg:text-6xl`}
             >
-              0{active + 1}
-            </span>
+              Everything students need to grow
+            </h2>
+            <span aria-hidden="true" className="mt-5 block h-1 w-24 rounded-full bg-gradient-to-r from-sky-300 via-white to-transparent" />
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-300/90 sm:text-lg">
+              A comfortable, safe and modern environment designed to support learning and student development.
+            </p>
+          </div>
 
-            {/* top row: counter + arrows */}
-            <div className="relative flex items-center justify-between">
-              <p className="text-xs font-semibold text-blue-100 sm:text-sm">
-                Facility <span className="text-amber-400">0{active + 1}</span> / 0{n}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => go(active - 1)}
-                  aria-label="Previous facility"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition active:scale-95 hover:bg-amber-400 hover:text-slate-900 sm:h-9 sm:w-9"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => go(active + 1)}
-                  aria-label="Next facility"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition active:scale-95 hover:bg-amber-400 hover:text-slate-900 sm:h-9 sm:w-9"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* icon + text */}
-            <div key={active} className="relative my-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-7 lg:my-0">
-              <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28 lg:h-36 lg:w-36">
-                <div className="fc-spin absolute inset-0 rounded-full border-2 border-dashed border-amber-400/60" />
-                <div className="absolute inset-3 rounded-full bg-amber-400/20 blur-xl" />
-                <div className="fc-icon absolute inset-3 flex items-center justify-center rounded-full bg-gradient-to-br from-white to-blue-100 text-blue-700 shadow-xl ring-4 ring-white/20 lg:inset-4">
-                  <CurIcon size={36} className="lg:h-12 lg:w-12" />
-                </div>
-              </div>
-              <div className="fc-in">
-                <h3 className={`${H} text-[22px] font-black leading-tight sm:text-3xl lg:text-[34px]`}>{cur.title}</h3>
-                <p className="mt-2 max-w-md text-[13.5px] leading-6 text-slate-300 sm:mt-2.5 sm:text-base sm:leading-7">{cur.desc}</p>
-              </div>
-            </div>
-
-            {/* bottom: progress + link */}
-            <div className="relative">
-              <div className="flex items-center gap-1.5">
-                {facilities.map((f, i) => (
-                  <button
-                    key={f.title}
-                    type="button"
-                    onClick={() => go(i)}
-                    aria-label={`Show ${f.title}`}
-                    className="group flex h-5 flex-1 items-center" /* bigger tap area */
-                  >
-                    <span className="relative block h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-                      {i < active && <span className="absolute inset-0 bg-white/60" />}
-                      {i === active && (
-                        <span
-                          key={`${active}-${tick}`}
-                          className="absolute inset-y-0 left-0 w-full origin-left bg-amber-400"
-                          style={{
-                            animation: `fc-bar ${DURATION}ms linear forwards`,
-                            animationPlayState: paused ? "paused" : "running",
-                          }}
-                        />
-                      )}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <Link
-                href="/gallery"
-                className="group mt-3 inline-flex items-center gap-2 text-sm font-bold text-amber-400 hover:text-amber-300 sm:mt-4"
-              >
-                See our campus in the gallery
-                <ArrowRight size={16} className="transition group-hover:translate-x-1" />
-              </Link>
-            </div>
+          <div className="flex items-center gap-3">
+            <p className={`${H} mr-1 text-sm font-bold`}>
+              0{active + 1} <span className="text-white/50">/ 0{n}</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => go(active - 1)}
+              aria-label="Previous facility"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/25 transition hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(active + 1)}
+              aria-label="Next facility"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/25 transition hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
-        {/* 3) LIST: 2-col grid on mobile, 3-col on sm, vertical list on desktop */}
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:col-start-1 lg:row-start-2 lg:flex lg:flex-col lg:gap-2.5">
-          {facilities.map(({ icon: Icon, title }, i) => {
+        {/* Expanding panels: vertical accordion on mobile, horizontal on desktop */}
+        <div
+          ref={ref}
+          className="mt-10 flex flex-col gap-3 md:mt-14 lg:h-[30rem] lg:flex-row lg:gap-4 xl:h-[34rem]"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocus={() => setPaused(true)}
+          onBlur={() => setPaused(false)}
+        >
+          {facilities.map(({ icon: Icon, title, desc }, i) => {
             const on = i === active;
             return (
-              <button
+              <article
                 key={title}
-                type="button"
-                onClick={() => go(i)}
-                onPointerEnter={mouseOnly(() => i !== active && go(i))}
-                aria-pressed={on}
-                className={`group flex min-w-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[13px] font-bold leading-tight transition duration-300 sm:text-sm lg:w-full lg:gap-4 lg:rounded-2xl lg:px-4 lg:py-3.5 lg:text-base ${
-                  on
-                    ? "bg-gradient-to-r from-[#0F2A4D] to-blue-700 text-white shadow-lg shadow-blue-900/20 lg:translate-x-2"
-                    : "bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-white hover:ring-blue-200"
+                data-active={on}
+                className={`${shown ? "fc-up" : "opacity-0"} group relative overflow-hidden rounded-3xl bg-gradient-to-br ${
+                  LOOKS[i % LOOKS.length]
+                } shadow-2xl shadow-black/40 ring-1 ring-white/15 transition-[height,flex-grow,filter] duration-700 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none h-[4.75rem] data-[active=true]:h-[19.5rem] sm:data-[active=true]:h-[18rem] lg:h-auto lg:flex-[1_1_0%] lg:data-[active=true]:h-auto lg:data-[active=true]:flex-[5_1_0%] ${
+                  on ? "ring-white/40" : "brightness-[0.8] hover:brightness-100"
                 }`}
+                style={shown ? { animationDelay: `${i * 90}ms` } : undefined}
+                onPointerEnter={hoverActivate(i)}
               >
-                <span className={`${H} hidden w-6 text-sm font-black lg:block ${on ? "text-amber-400" : "text-slate-300"}`}>
-                  0{i + 1}
-                </span>
+                {/* full-cover toggle (keeps the Link below clickable via z-index) */}
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  onFocus={() => setActive(i)}
+                  aria-expanded={on}
+                  aria-label={title}
+                  className="absolute inset-0 z-10 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                />
+
+                {/* texture + glow */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.12]"
+                  style={{ backgroundImage: "radial-gradient(#fff 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+                />
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/25 blur-3xl transition-opacity duration-700 ${
+                    on ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+
+                {/* giant icon watermark */}
+                <Icon
+                  aria-hidden="true"
+                  strokeWidth={1}
+                  className={`pointer-events-none absolute -bottom-8 -right-8 h-56 w-56 text-white transition duration-700 lg:h-80 lg:w-80 ${
+                    on ? "rotate-0 opacity-[0.14]" : "-rotate-12 opacity-0"
+                  }`}
+                />
+
+                {/* header row */}
+                <div className="pointer-events-none relative flex h-[4.75rem] items-center gap-3.5 px-4 lg:absolute lg:inset-x-0 lg:top-0 lg:h-auto lg:flex-col lg:items-start lg:gap-3 lg:p-6">
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/40 backdrop-blur transition duration-500 lg:h-12 lg:w-12 ${
+                      on ? "scale-105 bg-white text-slate-900" : ""
+                    }`}
+                  >
+                    <Icon size={22} />
+                  </span>
+                  <span className={`${H} text-sm font-black text-white/70 lg:text-base`}>0{i + 1}</span>
+                  <span className={`${H} min-w-0 flex-1 truncate text-base font-black lg:hidden`}>{title}</span>
+                </div>
+
+                {/* vertical title when collapsed (desktop) */}
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full lg:h-10 lg:w-10 lg:rounded-xl ${
-                    on ? "bg-white/15 text-white" : "bg-white text-blue-600 ring-1 ring-slate-200"
+                  aria-hidden="true"
+                  className={`${H} pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 rotate-180 whitespace-nowrap text-xl font-black transition-opacity duration-500 [writing-mode:vertical-rl] lg:block ${
+                    on ? "opacity-0" : "opacity-100 delay-200"
                   }`}
                 >
-                  <Icon size={16} />
+                  {title}
                 </span>
-                <span className="min-w-0 flex-1 break-words">{title}</span>
-                <ArrowRight
-                  size={17}
-                  className={`hidden transition lg:block ${on ? "text-amber-400" : "text-slate-300 group-hover:text-blue-500"}`}
-                />
-              </button>
+
+                {/* expanded body */}
+                <div
+                  className={`relative px-4 pb-5 transition-opacity duration-500 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-8 lg:pb-8 ${
+                    on ? "opacity-100 delay-300" : "pointer-events-none opacity-0"
+                  }`}
+                >
+                  <h3 className={`${H} hidden text-3xl font-black leading-tight lg:block xl:text-4xl`}>{title}</h3>
+                  <p className="mt-1 max-w-md text-[14px] leading-6 text-white/90 lg:mt-3 lg:text-base lg:leading-7">{desc}</p>
+                  {on && (
+                    <Link
+                      href="/gallery"
+                      className="pointer-events-auto relative z-20 mt-3 inline-flex items-center gap-2 text-sm font-bold text-white underline decoration-white/60 decoration-2 underline-offset-4 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:mt-5"
+                    >
+                      See it in the gallery <ArrowRight size={15} />
+                    </Link>
+                  )}
+                </div>
+
+                {/* autoplay progress (desktop) */}
+                {on && autoplay && (
+                  <span className="pointer-events-none absolute inset-x-6 bottom-4 hidden h-1 overflow-hidden rounded-full bg-white/25 lg:block">
+                    <span
+                      key={active}
+                      className="fc-bar absolute inset-0 origin-left bg-white"
+                      style={{ animation: `fc-bar ${DURATION}ms linear forwards` }}
+                    />
+                  </span>
+                )}
+              </article>
             );
           })}
+        </div>
+
+        <div className="mt-10 text-center md:mt-14">
+          <Link
+            href="/gallery"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-700 px-7 py-3.5 font-bold text-white shadow-[0_10px_28px_-8px_rgba(56,189,248,0.8)] transition hover:from-sky-400 hover:to-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            See our campus in the gallery
+            <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </section>

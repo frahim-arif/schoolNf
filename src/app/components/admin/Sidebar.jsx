@@ -28,10 +28,14 @@ import {
   HiOutlineDocumentCheck,
 } from "react-icons/hi2";
 
-// Logo is stored at: src/images/logo.png
+// Logo is stored at: src/images/logo.png  (replace this file with the school logo)
 // "@" is the default alias for "src" in Next.js. If your project does not use it,
 // replace with a relative path (for example "../../../images/logo.png").
 import logo from "@/images/logo.png";
+
+const SCHOOL_NAME_LINE_1 = "Niz Dhing GyanDeep";
+const SCHOOL_NAME_LINE_2 = "Jatiya Bidyalaya";
+const SCHOOL_FULL_NAME = "Niz Dhing GyanDeep Jatiya Bidyalaya";
 
 const menuItems = [
   { title: "Dashboard", icon: HiOutlineHome, href: "/admin/dashboard" },
@@ -248,16 +252,16 @@ const menuItems = [
     ],
   },
   {
-  title: "Gallery",
-  icon: HiOutlinePhoto,
-  children: [
-    { title: "Gallery Dashboard", href: "/admin/gallery" },
-    { title: "All Photos & Videos", href: "/admin/gallery/photos" },
-    { title: "Add Gallery Item", href: "/admin/gallery/create" },
-    { title: "Albums", href: "/admin/gallery/albums" },
-    { title: "Gallery Settings", href: "/admin/gallery/settings" },
-  ],
-},
+    title: "Gallery",
+    icon: HiOutlinePhoto,
+    children: [
+      { title: "Gallery Dashboard", href: "/admin/gallery" },
+      { title: "All Photos & Videos", href: "/admin/gallery/photos" },
+      { title: "Add Gallery Item", href: "/admin/gallery/create" },
+      { title: "Albums", href: "/admin/gallery/albums" },
+      { title: "Gallery Settings", href: "/admin/gallery/settings" },
+    ],
+  },
   {
     title: "Settings", icon: HiOutlineCog6Tooth,
     children: [
@@ -355,7 +359,7 @@ export default function Sidebar({ onLogout }) {
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
         aria-expanded={open}
-        className="fixed left-4 top-4 z-40 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 p-2 text-white shadow-lg shadow-pink-500/30 transition hover:from-pink-500 hover:to-rose-600 focus:outline-none focus:ring-2 focus:ring-pink-300 lg:hidden"
+        className="fixed left-4 top-4 z-40 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 p-2 text-white shadow-lg shadow-emerald-900/40 transition hover:from-emerald-600 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 lg:hidden"
       >
         <HiOutlineBars3 size={25} />
       </button>
@@ -370,7 +374,7 @@ export default function Sidebar({ onLogout }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 cursor-default bg-[#1a0d08]/60 backdrop-blur-[2px] lg:hidden"
+            className="fixed inset-0 z-40 cursor-default bg-[#0a1f19]/60 backdrop-blur-[2px] lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -381,26 +385,26 @@ export default function Sidebar({ onLogout }) {
         className={`
           fixed left-0 top-0 z-50 flex h-dvh w-72 max-w-[85vw]
           flex-col overflow-hidden
-          bg-gradient-to-b from-[#5a3425] via-[#3e2218] to-[#22110b]
+          bg-gradient-to-b from-[#1f4d40] via-[#173b32] to-[#0d2620]
           text-white shadow-2xl shadow-black/40
-          border-r border-pink-300/10
+          border-r border-emerald-300/10
           transition-transform duration-300 ease-in-out
           ${open ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
       >
-        {/* Soft pink glow decorations */}
+        {/* Soft green glow decorations */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-pink-500/25 blur-3xl"
+          className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/25 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-rose-400/15 blur-3xl"
+          className="pointer-events-none absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-teal-400/15 blur-3xl"
         />
 
         {/* LOGO */}
-        <div className="relative flex h-20 shrink-0 items-center justify-between border-b border-pink-200/10 px-5">
+        <div className="relative flex h-20 shrink-0 items-center justify-between border-b border-emerald-200/10 px-5">
           <Link
             href="/admin/dashboard"
             onClick={() => setOpen(false)}
@@ -408,16 +412,19 @@ export default function Sidebar({ onLogout }) {
           >
             <Image
               src={logo}
-              alt="Adarsha Markaz Academy logo"
-              className="h-12 w-auto shrink-0 drop-shadow-[0_2px_8px_rgba(244,114,182,0.45)]"
+              alt={`${SCHOOL_FULL_NAME} logo`}
+              priority
+              className="h-12 w-12 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(52,211,153,0.45)]"
             />
             <span className="min-w-0">
-              <h2 className="text-[15px] font-black leading-tight tracking-tight text-pink-50">
-                Adarsha Markaz Academy
-              </h2>
-              <p className="mt-0.5 text-xs text-pink-200/80">
+              <span className="block text-[13px] font-black leading-tight tracking-tight text-emerald-50">
+                {SCHOOL_NAME_LINE_1}
+                <br />
+                {SCHOOL_NAME_LINE_2}
+              </span>
+              <span className="mt-0.5 block text-xs text-emerald-200/80">
                 Administration Panel
-              </p>
+              </span>
             </span>
           </Link>
 
@@ -425,7 +432,7 @@ export default function Sidebar({ onLogout }) {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="ml-2 rounded-lg p-1 text-pink-100 transition hover:bg-pink-300/15 focus:outline-none focus:ring-2 focus:ring-pink-300/60 lg:hidden"
+            className="ml-2 rounded-lg p-1 text-emerald-100 transition hover:bg-emerald-300/15 focus:outline-none focus:ring-2 focus:ring-emerald-300/60 lg:hidden"
           >
             <HiOutlineXMark size={26} />
           </button>
@@ -434,7 +441,7 @@ export default function Sidebar({ onLogout }) {
         {/* MENU */}
         <nav
           aria-label="Admin navigation"
-          className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:thin] [scrollbar-color:rgba(244,114,182,0.4)_transparent]"
+          className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 [scrollbar-width:thin] [scrollbar-color:rgba(52,211,153,0.4)_transparent]"
         >
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -455,18 +462,18 @@ export default function Sidebar({ onLogout }) {
                     className={`
                       group relative flex w-full items-center justify-between rounded-xl
                       px-3.5 py-3 transition-colors duration-200
-                      focus:outline-none focus:ring-2 focus:ring-pink-300/50
+                      focus:outline-none focus:ring-2 focus:ring-emerald-300/50
                       ${
                         hasActiveChild
-                          ? "bg-pink-300/15 text-pink-50"
-                          : "text-pink-100/80 hover:bg-pink-300/10 hover:text-pink-50"
+                          ? "bg-emerald-300/15 text-emerald-50"
+                          : "text-emerald-100/80 hover:bg-emerald-300/10 hover:text-emerald-50"
                       }
                     `}
                   >
                     {hasActiveChild && (
                       <span
                         aria-hidden="true"
-                        className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-pink-300 to-rose-500"
+                        className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-emerald-300 to-teal-500"
                       />
                     )}
 
@@ -475,8 +482,8 @@ export default function Sidebar({ onLogout }) {
                         size={21}
                         className={`shrink-0 transition-colors ${
                           hasActiveChild
-                            ? "text-pink-300"
-                            : "text-pink-200/70 group-hover:text-pink-300"
+                            ? "text-emerald-300"
+                            : "text-emerald-200/70 group-hover:text-emerald-300"
                         }`}
                       />
                       <span className="truncate text-left text-sm font-semibold">
@@ -486,7 +493,7 @@ export default function Sidebar({ onLogout }) {
 
                     <HiChevronDown
                       size={18}
-                      className={`shrink-0 text-pink-200/70 transition-transform duration-300 ${
+                      className={`shrink-0 text-emerald-200/70 transition-transform duration-300 ${
                         isExpanded ? "rotate-180" : ""
                       }`}
                     />
@@ -499,7 +506,7 @@ export default function Sidebar({ onLogout }) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="ml-4 mt-1.5 space-y-1 overflow-hidden border-l border-pink-300/25 pl-3"
+                        className="ml-4 mt-1.5 space-y-1 overflow-hidden border-l border-emerald-300/25 pl-3"
                       >
                         {item.children.map((child) => {
                           const active = isChildActive(
@@ -517,11 +524,11 @@ export default function Sidebar({ onLogout }) {
                               className={`
                                 flex min-w-0 items-center gap-2 rounded-lg
                                 px-3 py-2.5 text-sm transition-all duration-200
-                                focus:outline-none focus:ring-2 focus:ring-pink-300/50
+                                focus:outline-none focus:ring-2 focus:ring-emerald-300/50
                                 ${
                                   active
-                                    ? "translate-x-0.5 bg-gradient-to-r from-pink-300 to-rose-400 font-bold text-[#3e2218] shadow-lg shadow-pink-500/30"
-                                    : "text-pink-100/80 hover:translate-x-0.5 hover:bg-pink-300/10 hover:text-pink-50"
+                                    ? "translate-x-0.5 bg-gradient-to-r from-emerald-300 to-teal-400 font-bold text-[#173b32] shadow-lg shadow-emerald-500/30"
+                                    : "text-emerald-100/80 hover:translate-x-0.5 hover:bg-emerald-300/10 hover:text-emerald-50"
                                 }
                               `}
                             >
@@ -552,11 +559,11 @@ export default function Sidebar({ onLogout }) {
                 className={`
                   mb-1.5 flex items-center gap-3 rounded-xl px-3.5 py-3
                   transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-pink-300/50
+                  focus:outline-none focus:ring-2 focus:ring-emerald-300/50
                   ${
                     active
-                      ? "bg-gradient-to-r from-pink-300 to-rose-400 font-bold text-[#3e2218] shadow-lg shadow-pink-500/30"
-                      : "text-pink-100/80 hover:bg-pink-300/10 hover:text-pink-50"
+                      ? "bg-gradient-to-r from-emerald-300 to-teal-400 font-bold text-[#173b32] shadow-lg shadow-emerald-500/30"
+                      : "text-emerald-100/80 hover:bg-emerald-300/10 hover:text-emerald-50"
                   }
                 `}
               >
@@ -570,7 +577,7 @@ export default function Sidebar({ onLogout }) {
         </nav>
 
         {/* LOGOUT */}
-        <div className="relative shrink-0 border-t border-pink-200/10 bg-[#22110b]/70 p-4 backdrop-blur">
+        <div className="relative shrink-0 border-t border-emerald-200/10 bg-[#0d2620]/70 p-4 backdrop-blur">
           <button
             type="button"
             onClick={() => {
@@ -581,7 +588,7 @@ export default function Sidebar({ onLogout }) {
                 console.warn("Please connect the existing logout function.");
               }
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-pink-300/40 bg-pink-400/15 py-3 font-semibold text-pink-100 transition hover:border-transparent hover:bg-gradient-to-r hover:from-pink-400 hover:to-rose-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-pink-300/60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/40 bg-emerald-400/15 py-3 font-semibold text-emerald-100 transition hover:border-transparent hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-300/60"
           >
             <HiOutlineArrowLeftOnRectangle size={22} />
             Logout
