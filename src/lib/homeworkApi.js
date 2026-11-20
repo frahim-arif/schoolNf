@@ -1,6 +1,6 @@
 
 const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+  process.env.NEXT_PUBLIC_API_URL || "https://schoolnb.onrender.com"
 ).replace(/\/+$/, "");
 
 async function parseResponse(response) {
